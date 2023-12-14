@@ -7,7 +7,7 @@ type Args = {
 
 export const fetcher = async ({ url, headers }: Args) => {
   try {
-    const res = await axios.get(url, headers || {});
+    const res = await axios.get(`http://localhost:4000${url}`, headers || {});
     return res.data;
   } catch (err) {}
 };

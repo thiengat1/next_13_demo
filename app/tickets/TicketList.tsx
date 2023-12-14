@@ -1,5 +1,7 @@
+'use client';
 import Link from 'next/link';
 import { resolve } from 'path';
+import { useSWRWithEndpoint } from '../api/useSWR';
 
 interface ITickets {
   id: string;
@@ -8,24 +10,22 @@ interface ITickets {
   priority: string;
   user_email: string;
 }
-
-async function getTickets() {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
-  const res = await fetch('http://localhost:4000/tickets', {
-    next: {
-      revalidate: 60,
-    },
-  });
-
-  return res.json();
+export interface IApiResponse<T> {
+  code: string;
+  data: {
+    data: T;
+  };
 }
 
-export default async function TicketList() {
-  const tickets = await getTickets();
+export default function TicketList() {
+  const { data, isLoading } =
+    useSWRWithEndpoint<IApiResponse<ITickets[]>>('/tickets');
+
+  console.log('isLoading', isLoading);
 
   return (
     <div>
-      {tickets.map((ticket: ITickets) => (
+      {data?.map((ticket: ITickets) => (
         <div key={ticket.id} className='card my-5'>
           <Link href={`/tickets/${ticket.id}`}>
             <h3>{ticket.title}</h3>
@@ -36,7 +36,7 @@ export default async function TicketList() {
           </Link>
         </div>
       ))}
-      {tickets.length === 0 && (
+      {data?.length === 0 && (
         <p className='text-center'>there are no open tickets, yay!</p>
       )}
     </div>
